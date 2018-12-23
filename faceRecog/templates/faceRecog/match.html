@@ -1,0 +1,12 @@
+<div align="center">
+<h1>Match</h1>
+<a href="/facerecog/read/">readmodel</a>
+
+
+<form method="POST" enctype="multipart/form-data" action="/facerecog/recog/">
+{% csrf_token %}
+<input type="file" name="img"><br>
+<button type="submit">upload</button>
+</form>
+</div>
+

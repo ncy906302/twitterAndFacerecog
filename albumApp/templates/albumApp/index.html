@@ -1,0 +1,132 @@
+
+
+<title>TwitterTube</title>
+<link rel="Shortcut Icon" type="image/x-icon" href="http://lametro.edu.ec/wp-content/uploads/2017/03/favicon.png" />
+
+
+{% load static %}
+
+
+<script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.10.0/js/lightbox-plus-jquery.min.js"></script>
+
+ 
+<script src="//apps.bdimg.com/libs/jquery/2.1.1/jquery.min.js"></script>
+
+
+<script src="{% static 'albumApp/jquery.colorbox.js' %}"></script>
+
+<style>
+.search
+{
+ height:200;
+}
+
+
+input[type="text"] {
+    width: 500;
+    font-size: 2vw;
+}
+</style>
+
+<script type="text/javascript">
+$(document).ready(function(){
+    var img =[];
+    var name =[];
+    var account = [];
+    {% for i in content.img_list %}
+        {% for j in i %}
+            var a = $('<textarea />').html("{{j}}").text();
+            img.push(a);
+        {% endfor %}
+        
+    {% endfor %}
+    {% for i in content.name_list %}
+        {% for j in i %}
+            var a = $('<textarea />').html("{{j}}").text();
+            name.push(a);
+        {% endfor %}
+    {% endfor %}
+    {% for i in content.account_list %}
+        {% for j in i %}
+            var a = $('<textarea />').html("{{j}}").text();
+            account.push(a);
+        {% endfor %}
+    {% endfor %}
+    console.log(img)
+    console.log(name)
+    console.log(account)
+
+    $("#wait").hide();
+    $(".urlpost").click(function(){
+        $("#wait").show(1000);
+        $(this).hide();
+	});
+    $("#url").click(function() {
+    $("#url").attr("value","");
+    });
+
+    for(var i=0;i<img.length;i++)
+    {
+         $("#search").append(
+                    "<table border=\"1\">"+
+                    "<tr>"+
+                    "<td rowspan=\"2\">"+"<img class=\"search\" src=\""+img[i]+"\" /></div>"+"</td>"+
+                    "<td>"+name[i]+"</td>"+
+                    "</tr>"+
+                    "<tr>"+
+                    "<td class=\"account\">https://twitter.com/"+account[i]+"</td>"+
+                    "</tr></table>");
+
+                    
+    }
+    $(".account").click(function() {
+        var a = $(this).text();
+        console.log(a);
+        $("#url").attr("value",a);
+        window.scrollTo(0, 0)
+    });
+
+
+});
+</script>
+
+<div align="center">
+
+<h1>將twiiter的圖片變成相簿</h1>
+
+
+<h3>輸入網址，點擊開始</h3>
+<h4>(ex:https://twitter.com/maaya_taso)</h4>
+<form method="POST" enctype="multipart/form-data" action="/app/upurl/">
+{% csrf_token %}
+<p><input type="text" id="url" name="url" value="https://twitter.com/maaya_taso"></p>
+<button class ="urlpost" type="submit" style="width:20%;font-size: 2vw;">開始</button>
+</form>
+
+<br><br><br><br><br>
+
+<h3>用關鍵字搜尋網址</h3>
+<h4>(ex:内田真礼)</h4>
+<form method="POST" enctype="multipart/form-data" action="/app/search/">
+    <p><input id="sinput" name="key" type="text" value=""></p>
+    <button class ="urlpost" type="submit"  style="width:20%;font-size: 2vw;">搜尋</button>
+    </form>
+
+
+<p id="wait">加載中，約莫5秒鐘...</p>
+
+
+
+    <div id="search">
+
+    
+
+    </div>
+
+
+
+
+</div>
+
+

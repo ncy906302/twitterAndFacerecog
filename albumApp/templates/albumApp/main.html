@@ -1,0 +1,187 @@
+{% load static %}
+<script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+
+<script src="{% static 'albumApp/jquery.colorbox.js' %}"></script>
+<link rel="stylesheet" href="{% static 'albumApp/colorbox.css' %}">
+
+<title>TwitterTube</title>
+<link rel="Shortcut Icon" type="image/x-icon" href="http://lametro.edu.ec/wp-content/uploads/2017/03/favicon.png" />
+
+
+<style>
+@import url(https://fonts.googleapis.com/earlyaccess/cwtexkai.css);
+
+.mon
+{
+    margin: 2px;
+    width: 300px;
+    top: -0px;
+    background-color: #CCCCFF;
+    font-size:32px;
+    vertical-align: middle;
+}
+#img
+{
+    display: flex;
+    flex-wrap: wrap;
+}
+#img::after {
+  content: '';
+  flex-grow: 999999999;
+}
+.imglist
+{
+    margin: 2px;
+    background-color: violet;
+    height: 200px;
+    flex-grow: 1;
+}
+img
+{
+    flex-grow: 1;
+    height: 200px;
+    object-fit: cover;
+    max-width: 100%;
+    min-width: 100%;
+    vertical-align: bottom;
+}
+</style>
+<script type="text/javascript">
+
+$(document).ready(function(){
+    $("#wait").hide();
+    $("#scroll").hide();
+    $("#showdate").hide();
+    $("#hidedate").hide();
+    var img_index = 0;
+    var handle ="{{ handle }}";
+    var month= '0';
+    var show_date = 0;
+    $("input").click(function() {
+    $("input").attr("value","");
+    });
+    $("#start").click(function(){
+        $("#ini").remove();
+        $("#start").remove();
+        $("#img").append("<p id=\"temp\">顯示中...</p>");
+		$.post("/app/jq/",
+        {
+            name:handle
+        },
+        function(data,status){
+            var img = JSON.parse(data)
+            console.log(img.img_list[0])
+            var count=0;
+            for(var i = img_index; i < img.img_list.length; i++){
+                if(img.month_list[i][0] != month)
+                {
+                    $("#img").append("<div class=\"mon\"><p style=\"text-align:middle;vertical-align: middle;\">"+img.month_list[i]+"月</p></div>");
+                }
+                for(var j = 0; j < img.img_list[i].length; j++){
+                    count=count+1;
+                    $("#img").append("<div class=\"imglist\">"+
+                    "<a class=\"group3\" href=\""+img.img_list[i][j]+"\" title=\""+img.date_list[i]+"\">"+
+                    "<img class=\"example-image\" src=\""+img.img_list[i][j]+"\" /></a>"+
+                    "<p class=\"date\">"+img.date_list[i]+"</p></div>");
+                }
+                month = img.month_list[i][0];
+                console.log(month);
+                $(".group3").colorbox({rel:'group3', transition:"none", height:"800px" });
+            }
+            img_index=img_index+count;
+            $("#temp").remove();
+            $("#scroll").show();
+            $("#showdate").show();
+            $(".date").hide();
+
+
+		});
+        
+	});
+	$("#scroll").click(function(){
+        $("#ini").remove();
+        $("#scroll").hide();
+        $("#img").append("<p id=\"temp\">顯示中...</p>");
+		$.post("/app/jq/",
+        {
+            name:handle
+        },
+        function(data,status){
+            var img = JSON.parse(data)
+            console.log(img.img_list[0])
+            var count =0;
+            for(var i = img_index; i < img.img_list.length; i++){
+                if(img.month_list[i][0] != month)
+                {
+                    $("#img").append("<div class=\"mon\"><p style=\"text-align:middle;vertical-align: middle;\">"+img.month_list[i]+"月</p></div>");
+                }
+                for(var j = 0; j < img.img_list[i].length; j++){
+                    count = count +1;
+                    $("#img").append("<div id=\"imglist\" class=\"imglist\">"+
+                    "<a class=\"group3\" href=\""+img.img_list[i][j]+"\" title=\""+img.date_list[i]+"\">"+
+                    "<img class=\"example-image\" src=\""+img.img_list[i][j]+"\" /></a>"+
+                    "<p class=\"date\">"+img.date_list[i]+"</p></div>");
+                }
+                month = img.month_list[i][0];
+                console.log(month);
+            }
+            img_index=img_index+count;
+            $("#temp").remove();
+            $("#scroll").show();
+            $(".group3").colorbox({rel:'group3', transition:"none", height:"800px"});
+            
+            if(show_date==0){
+                $(".date").hide();
+            }
+            
+		});
+        
+	});
+    $("#urlpost").click(function(){
+        $("#wait").show(1000);
+        $(this).hide();
+        
+	});
+    $("#showdate").click(function(){
+        $(this).hide();
+        $(".date").show();
+        $("#hidedate").show();
+        show_date = 1;
+    })
+    $("#hidedate").click(function(){
+        $(this).hide();
+        $(".date").hide();
+        $("#showdate").show();
+        show_date = 0;
+    })
+});
+</script>
+
+
+
+<div align="center">
+<h1>{{title}}</h1>
+
+<a href="/app">回首頁</a>
+<form method="POST" enctype="multipart/form-data" action="/app/upurl/">
+{% csrf_token %}
+<input type="text" name="url" value="" >	
+<button id ="urlpost" type="submit" >confirm</button>
+</form>
+{% comment %} <button id ="showdate">顯示日期</button>
+<button id ="hidedate">隱藏日期</button> {% endcomment %}
+<p id="wait">加載中，約莫5秒鐘...</p>
+<p id="ini">加載成功!</p>
+
+<button id="start" style="width:30%;font-size: 2vw;">開始顯示</button>
+
+<div id="img">
+
+
+</div>
+
+
+</div>
+
+
+<div align="center"><button id="scroll" style="width:30%;font-size: 2vw;">顯示更多</button></div>
