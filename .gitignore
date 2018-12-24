@@ -1,2 +1,7 @@
 /SeetaFaceEngine/
 /pyseeta/
+/faceRecog/static
+albumApp/migrations/__pycache__/
+albumApp/__pycache__/
+faceRecog/__pycache__/
+

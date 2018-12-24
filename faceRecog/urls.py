@@ -6,6 +6,5 @@ app_name = 'faceRecog'
 
 urlpatterns = [
     path('', views.match, name='match'),
-    path('read/', views.readModel, name='readModel'),
     path('recog/', views.recog, name='recog'),
 ]

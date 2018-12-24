@@ -2,6 +2,10 @@ from django.shortcuts import render
 from django.http import HttpResponse
 # Create your views here.
 
+from django.shortcuts import render_to_response
+
+
+
 from faceRecog.models import *
 
 from pyseeta import Detector
@@ -31,9 +35,8 @@ def feat_match(feat1,feat2):
 
 
 
-
 @csrf_exempt
-def readModel(request):
+def match(request):
     global avdata
     avdata = {}
     fp = open("feat_list.txt", "r",encoding='shift_jis')
@@ -51,12 +54,6 @@ def readModel(request):
         avdata[name]=feat_list
         name = fp.readline().strip('\n')
     fp.close()
-    return render(request, 'faceRecog/match.html')
-
-
-@csrf_exempt
-def match(request):
-
 
     return render(request, 'faceRecog/match.html')
 
@@ -64,67 +61,77 @@ def match(request):
 
 @csrf_exempt
 def recog(request):
-    global avdata
-
-    detector = Detector('SeetaFaceEngine/model/seeta_fd_frontal_v1.0.bin')
-    aligner = Aligner('SeetaFaceEngine/model/seeta_fa_v1.1.bin')
-    identifier = Identifier('SeetaFaceEngine/model/seeta_fr_v1.0.bin')
-    detector.set_min_face_size(30)
-
-
-    if request.method == 'POST':
-        print(request.FILES['img'])
-        path = tempIMG(
-            img=request.FILES['img'],
-        )
-        path.save()
-        image_color_A = imread(str(path.img))
-        image_gray_A = cv2.cvtColor(image_color_A, cv2.COLOR_BGR2GRAY)
-        faces_A = detector.detect(image_gray_A)
-        length_list = []
-        if len(faces_A) or 0:
-            landmarks_A = aligner.align(image_gray_A, faces_A[0])
-            feat_test = identifier.extract_feature_with_crop(image_color_A, landmarks_A)
-
-
-
-        average_sim_list = []
-        name_list = []
-        sim_list=[]
-
-        for cla in avdata:    
-            simlist = []
-            name_list.append(cla)
-            weight =0
-            for fea in avdata[cla]:
-                sim = feat_match(feat_test,fea)
-                simlist.append(sim)
-                if sim > 0.5:
-                    simlist.append(sim)
-                if sim > 0.55:
-                    simlist.append(sim)
-                if sim > 0.6:
-                    simlist.append(sim)
-            sim_list.append(simlist)
-            if len(simlist) == 0:
-                average_sim_list.append(0)
-            else:
-                average_sim = sum(simlist)/len(simlist)
-                average_sim_list.append(average_sim)
-
-        # print(average_sim_list)    
-        max_index = average_sim_list.index(max(average_sim_list))
+    try:
+        global avdata
         
-        sort_list = sorted(average_sim_list)
-        result_list =[]
-        for j in range(5):
-            result_list.append(name_list[average_sim_list.index(sort_list[-(j+1)])])
-    
-        print(name_list[max_index])
-        print(average_sim_list[max_index])
-    identifier.release()
-    aligner.release()
-    detector.release()
-    content = {'result_list':result_list}
+        detector = Detector('SeetaFaceEngine/model/seeta_fd_frontal_v1.0.bin')
+        aligner = Aligner('SeetaFaceEngine/model/seeta_fa_v1.1.bin')
+        identifier = Identifier('SeetaFaceEngine/model/seeta_fr_v1.0.bin')
+        detector.set_min_face_size(30)
 
-    return HttpResponse(json.dumps(content,ensure_ascii=False))
+        if request.method == 'POST':
+            path = tempIMG(
+                img=request.FILES['img'],
+            )
+            path.save()
+            image_color_A = imread(str(path.img))
+            image_gray_A = cv2.cvtColor(image_color_A, cv2.COLOR_BGR2GRAY)
+            faces_A = detector.detect(image_gray_A)
+            cv2.rectangle(image_color_A, (faces_A[0].left, faces_A[0].top), (faces_A[0].right, faces_A[0].bottom), (0,255,0), thickness=2)
+            cv2.imwrite('facerecog/static/facerecog/'+str(request.FILES['img']),image_color_A)
+            length_list = []
+            if len(faces_A) or 0:
+                landmarks_A = aligner.align(image_gray_A, faces_A[0])
+                feat_test = identifier.extract_feature_with_crop(image_color_A, landmarks_A)
+
+            average_sim_list = []
+            name_list = []
+            sim_list=[]
+
+            for cla in avdata:    
+                simlist = []
+                name_list.append(cla)
+                weight =0
+                for fea in avdata[cla]:
+                    sim = feat_match(feat_test,fea)
+                    simlist.append(sim)
+                    if sim > 0.5:
+                        simlist.append(sim)
+                    if sim > 0.55:
+                        simlist.append(sim)
+                    if sim > 0.6:
+                        simlist.append(sim)
+                sim_list.append(simlist)
+                if len(simlist) == 0:
+                    average_sim_list.append(0)
+                else:
+                    average_sim = sum(simlist)/len(simlist)
+                    average_sim_list.append(average_sim)
+
+            # print(average_sim_list)    
+            max_index = average_sim_list.index(max(average_sim_list))
+            
+            sort_list = sorted(average_sim_list)
+            result_list =[]
+            for j in range(5):
+                result_list.append(name_list[average_sim_list.index(sort_list[-(j+1)])])
+        
+            print(name_list[max_index])
+            print(average_sim_list[max_index])
+        identifier.release()
+        aligner.release()
+        detector.release()
+
+        name = str(request.FILES['img'])
+        print(name)
+        file_name=[]
+        file_name.append(name)
+        content = {'result_list':result_list ,'file_name': file_name}
+
+        # return HttpResponse(json.dumps(content,ensure_ascii=False))
+        return render(request,'facerecog/match.html',content)
+    except:
+        return HttpResponse('請指定檔案!')
+
+
+    

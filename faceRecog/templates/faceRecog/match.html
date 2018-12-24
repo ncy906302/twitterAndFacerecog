@@ -1,12 +1,49 @@
+{% load static %}
+<script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+
+
+
+<script>
+$(document).ready(function(){
+    
+});
+</script>
+<style>
+#upload
+{
+    height: 500px;
+}
+.sim
+{
+    align: center;
+}
+</style>
+
 <div align="center">
 <h1>Match</h1>
-<a href="/facerecog/read/">readmodel</a>
-
 
 <form method="POST" enctype="multipart/form-data" action="/facerecog/recog/">
 {% csrf_token %}
 <input type="file" name="img"><br>
 <button type="submit">upload</button>
 </form>
+
+
+
+<div class="sim">
+{% for o in file_name %}
+<table border="1">
+<tr><td rowspan="7"><img id="upload" src="{% static '/facerecog/'%}{{o}}" /></td></tr>
+
+    <tr><td><h3>相似度排行榜：</h3></td></tr>
+        {% for o in result_list %}
+            <tr><td><p>{{ forloop.counter }}.{{o}}</p></td></tr>
+        {% endfor %}
+</table>
+{% endfor %}
 </div>
+
+
+</div>
+
 
