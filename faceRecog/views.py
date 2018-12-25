@@ -37,11 +37,10 @@ def feat_match(feat1,feat2):
 
 @csrf_exempt
 def match(request):
-    global avdata
+    global avdata,name_img
     avdata = {}
     fp = open("feat_list.txt", "r",encoding='shift_jis')
     name = fp.readline().strip('\n')
-    
 
     while(name!= ''):
         feat_list = []
@@ -62,7 +61,7 @@ def match(request):
 @csrf_exempt
 def recog(request):
     try:
-        global avdata
+        global avdata,name_img
         
         detector = Detector('SeetaFaceEngine/model/seeta_fd_frontal_v1.0.bin')
         aligner = Aligner('SeetaFaceEngine/model/seeta_fa_v1.1.bin')
@@ -126,7 +125,16 @@ def recog(request):
         print(name)
         file_name=[]
         file_name.append(name)
-        content = {'result_list':result_list ,'file_name': file_name}
+        
+        print(result_list)
+        name_img = np.load('name_img.npy').item()
+        print(name_img[result_list[0]])
+        img_link=[]
+        for name in result_list:
+            img_link.append(name_img[name])
+        
+        
+        content = {'result_list':result_list ,'file_name': file_name, 'img_link':img_link }
 
         # return HttpResponse(json.dumps(content,ensure_ascii=False))
         return render(request,'facerecog/match.html',content)
