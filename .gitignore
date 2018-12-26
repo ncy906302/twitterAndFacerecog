@@ -1,7 +1,13 @@
 /SeetaFaceEngine/
 /pyseeta/
 /faceRecog/static
-albumApp/migrations/__pycache__/
-albumApp/__pycache__/
-faceRecog/__pycache__/
-
+/albumApp/migrations/__pycache__/
+/albumApp/__pycache__/
+/faceRecog/__pycache__/
+/albumApp/__pycache__/
+/twitterMedia/__pycache__/
+/faceRecog/migrations/__pycache__/
+twitterMedia/__pycache__/wsgi.cpython-36.pyc
+faceRecog/migrations/__pycache__/__init__.cpython-36.pyc
+faceRecog/migrations/__pycache__/0001_initial.cpython-36.pyc
+albumApp/migrations/__pycache__/__init__.cpython-36.pyc
