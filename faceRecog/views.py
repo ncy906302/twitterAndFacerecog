@@ -38,22 +38,25 @@ def feat_match(feat1,feat2):
 @csrf_exempt
 def match(request):
     global avdata
-    avdata = {}
-    fp = open("feat_list.txt", "r",encoding='shift_jis')
-    name = fp.readline().strip('\n')
-    
 
-    while(name!= ''):
-        feat_list = []
-        num = fp.readline()
-        for i in range(int(num)):
-            feat = fp.readline()
-            feat = feat.split(',')
-            feat = np.array(feat,dtype=float)
-            feat_list.append(feat)
-        avdata[name]=feat_list
+    try:
+        print(len(avdata))
+    except:
+        avdata = {}
+        fp = open("feat_list.txt", "r",encoding='shift_jis')
         name = fp.readline().strip('\n')
-    fp.close()
+
+        while(name!= ''):
+            feat_list = []
+            num = fp.readline()
+            for i in range(int(num)):
+                feat = fp.readline()
+                feat = feat.split(',')
+                feat = np.array(feat,dtype=float)
+                feat_list.append(feat)
+            avdata[name]=feat_list
+            name = fp.readline().strip('\n')
+        fp.close()
 
     return render(request, 'faceRecog/match.html')
 
@@ -62,7 +65,7 @@ def match(request):
 @csrf_exempt
 def recog(request):
     try:
-        global avdata
+        global avdata,name_img
         
         detector = Detector('SeetaFaceEngine/model/seeta_fd_frontal_v1.0.bin')
         aligner = Aligner('SeetaFaceEngine/model/seeta_fa_v1.1.bin')
@@ -78,7 +81,7 @@ def recog(request):
             image_gray_A = cv2.cvtColor(image_color_A, cv2.COLOR_BGR2GRAY)
             faces_A = detector.detect(image_gray_A)
             cv2.rectangle(image_color_A, (faces_A[0].left, faces_A[0].top), (faces_A[0].right, faces_A[0].bottom), (0,255,0), thickness=2)
-            cv2.imwrite('facerecog/static/facerecog/'+str(request.FILES['img']),image_color_A)
+            cv2.imwrite('facerecog/static/facerecog/'+'img.jpg',image_color_A)
             length_list = []
             if len(faces_A) or 0:
                 landmarks_A = aligner.align(image_gray_A, faces_A[0])
@@ -126,12 +129,21 @@ def recog(request):
         print(name)
         file_name=[]
         file_name.append(name)
-        content = {'result_list':result_list ,'file_name': file_name}
+        
+        print(result_list)
+        name_img = np.load('name_img.npy').item()
+        print(name_img[result_list[0]])
+        img_link=[]
+        for name in result_list:
+            img_link.append(name_img[name])
+        
+        
+        content = {'result_list':result_list ,'file_name': file_name, 'img_link':img_link }
 
         # return HttpResponse(json.dumps(content,ensure_ascii=False))
         return render(request,'facerecog/match.html',content)
     except:
-        return HttpResponse('請指定檔案!')
+        return HttpResponse('請指定有人臉的檔案!')
 
 
     
